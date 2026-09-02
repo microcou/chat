@@ -33,7 +33,7 @@ void handle_client(int client_fd, struct sockaddr_in client_addr) {
     
     std::string ip = ip_str;
     
-    std::string client_info = std::string("*** New client connected : ") + ip + " ***";
+    std::string client_info = std::string("*** New client connected : ") + ip + ", total : " + std::to_string(clients.size()) + " ***";
     broadcast_message(client_info, -1);
 
     while (true) {
@@ -51,7 +51,7 @@ void handle_client(int client_fd, struct sockaddr_in client_addr) {
         std::erase_if(clients, [client_fd](const ClientInfo& c) { return c.fd == client_fd; });
     }
 
-    std::string disconnect_msg = std::string("*** Client disconnected : ") + ip + " ***";
+    std::string disconnect_msg = std::string("*** Client disconnected : ") + ip + ", total : " + std::to_string(clients.size()) + " ***";
     broadcast_message(disconnect_msg, client_fd);
 
     close(client_fd);
