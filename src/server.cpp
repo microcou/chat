@@ -1,9 +1,10 @@
 #include <iostream>
 #include <thread>
-#include <vector>
+#include <unordered_map>
 #include <mutex>
 #include <algorithm>
 #include <cstring>
+#include <optional>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,29 +15,38 @@ struct ClientInfo {
     std::string ip;
 };
 
-std::vector<ClientInfo> clients;
+std::unordered_map<int, ClientInfo> clients;
 std::mutex clients_mutex;
 
+std::optional<ClientInfo> get_client_info(int client_fd) {
+    std::lock_guard lock(clients_mutex);
+
+    auto it = clients.find(client_fd);
+    if (it == clients.end()) {
+        return std::nullopt;
+    }
+
+    return it->second;
+}
+
 void broadcast_message(const std::string& message, int sender_fd) {
-    std::cout << message << std::endl;
     std::lock_guard<std::mutex> lock(clients_mutex);
     for (const auto& client : clients) {
-        if (client.fd != sender_fd) {
-            send(client.fd, message.c_str(), message.length(), 0);
+        if (client.second.fd != sender_fd) {
+            send(client.second.fd, message.c_str(), message.length(), 0);
         }
     }
 }
 
-void handle_client(int client_fd, struct sockaddr_in client_addr) {
-    char buffer[1024];
-    char ip_str[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, INET_ADDRSTRLEN);
-    
-    std::string ip = ip_str;
-    
-    std::string client_info = std::string("*** New client connected : ") + ip + ", total : " + std::to_string(clients.size()) + " ***";
-    broadcast_message(client_info, -1);
+void handle_client(int client_fd) {
+    auto client_info = get_client_info(client_fd);
+    std::string ip = client_info ? client_info->ip : "unknown client IP";
 
+    std::string new_connection_msg = std::string("*** New client connected : ") + ip + ", total : " + std::to_string(clients.size()) + " ***";
+    std::cout << new_connection_msg << std::endl;
+    broadcast_message(new_connection_msg, -1);
+    
+    char buffer[1024];
     while (true) {
         int bytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
         if (bytes <= 0) {
@@ -44,15 +54,17 @@ void handle_client(int client_fd, struct sockaddr_in client_addr) {
         }
         buffer[bytes] = '\0';
         std::string message(buffer);
+        std::cout << "[" << ip << "] " << message << std::endl;
         broadcast_message(message, client_fd);
     }
 
     {
-        std::lock_guard<std::mutex> lock(clients_mutex);
-        std::erase_if(clients, [client_fd](const ClientInfo& c) { return c.fd == client_fd; });
+        std::lock_guard lock(clients_mutex);
+        clients.erase(client_fd);
     }
 
     std::string disconnect_msg = std::string("*** Client disconnected : ") + ip + ", total : " + std::to_string(clients.size()) + " ***";
+    std::cout << disconnect_msg << std::endl;
     broadcast_message(disconnect_msg, client_fd);
 
     close(client_fd);
@@ -104,14 +116,11 @@ int main(int argc, char* argv[]) {
         inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, INET_ADDRSTRLEN);
 
         {
-            std::lock_guard<std::mutex> lock(clients_mutex);
-            ClientInfo info;
-            info.fd = client_fd;
-            info.ip = ip_str;
-            clients.push_back(info);
+            std::lock_guard lock(clients_mutex);
+            clients.emplace(client_fd, ClientInfo{client_fd, ip_str});
         }
 
-        std::thread(&handle_client, client_fd, client_addr).detach();
+        std::thread(&handle_client, client_fd).detach();
     }
 
     close(server_fd);
