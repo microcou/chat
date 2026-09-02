@@ -105,6 +105,13 @@ int main(int argc, char* argv[]) {
                 }
                 std::cout << std::endl << "Typing: ";
                 std::cout.flush();
+            } else if (c == '\b' || c == 127) {
+                std::lock_guard<std::mutex> lock(input_mutex);
+                if (!current_input.empty()) {
+                    current_input.pop_back();
+                    std::cout << "\b \b";
+                    std::cout.flush();
+                }
             } else {
                 {
                     std::lock_guard<std::mutex> lock(input_mutex);
