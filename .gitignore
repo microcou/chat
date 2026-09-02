@@ -3,3 +3,5 @@ client
 client_basic
 hello_curses
 ncurses-6.6/
+*.obj
+*.exe
