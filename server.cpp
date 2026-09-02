@@ -2,20 +2,26 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <algorithm>
 #include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-std::vector<int> clients;
+struct ClientInfo {
+    int fd;
+    std::string ip;
+};
+
+std::vector<ClientInfo> clients;
 std::mutex clients_mutex;
 
 void broadcast_message(const std::string& message, int sender_fd) {
     std::lock_guard<std::mutex> lock(clients_mutex);
-    for (int client_fd : clients) {
-        if (client_fd != sender_fd) {
-            send(client_fd, message.c_str(), message.length(), 0);
+    for (const auto& client : clients) {
+        if (client.fd != sender_fd) {
+            send(client.fd, message.c_str(), message.length(), 0);
         }
     }
 }
@@ -25,7 +31,9 @@ void handle_client(int client_fd, struct sockaddr_in client_addr) {
     char ip_str[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, INET_ADDRSTRLEN);
     
-    std::string client_info = std::string("New client connected from ") + ip_str;
+    std::string ip = ip_str;
+    
+    std::string client_info = std::string("*** New client connected : ") + ip + " ***";
     broadcast_message(client_info, -1);
 
     while (true) {
@@ -40,8 +48,11 @@ void handle_client(int client_fd, struct sockaddr_in client_addr) {
 
     {
         std::lock_guard<std::mutex> lock(clients_mutex);
-        std::erase(clients, client_fd);
+        std::erase_if(clients, [client_fd](const ClientInfo& c) { return c.fd == client_fd; });
     }
+
+    std::string disconnect_msg = std::string("*** Client disconnected : ") + ip + " ***";
+    broadcast_message(disconnect_msg, client_fd);
 
     close(client_fd);
 }
@@ -88,9 +99,15 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
+        char ip_str[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &client_addr.sin_addr, ip_str, INET_ADDRSTRLEN);
+
         {
             std::lock_guard<std::mutex> lock(clients_mutex);
-            clients.push_back(client_fd);
+            ClientInfo info;
+            info.fd = client_fd;
+            info.ip = ip_str;
+            clients.push_back(info);
         }
 
         std::thread(&handle_client, client_fd, client_addr).detach();
