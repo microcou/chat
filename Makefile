@@ -16,5 +16,8 @@ client: $(CLIENT_SRC)
 simple_client: $(SIMPLE_CLIENT_SRC)
 	$(CXX) $(CXXFLAGS) -o simple_client $(SIMPLE_CLIENT_SRC)
 
+hello_curses: src/hello_curses.c
+	gcc -Wall -Wextra -I./vendor/ncurses/include src/hello_curses.c ./vendor/ncurses/lib/libncursesw.a -o hello_curses
+
 clean:
 	rm -f $(TARGETS)

@@ -1,3 +1,5 @@
 client
 server
 simple_client
+ncurses-6.6
+hello_curses
