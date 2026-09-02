@@ -42,17 +42,6 @@ void receive_messages() {
 }
 
 int main(int argc, char* argv[]) {
-    // Disable buffering for stdout and stdin
-    std::setbuf(stdout, nullptr);
-    std::setbuf(stdin, nullptr);
-    
-    // Set terminal to non-canonical mode
-    termios tty;
-    tcgetattr(STDIN_FILENO, &tty);
-    original_tty = tty;  // Save original settings
-    tty.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &tty);
-    
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <ip> <port>" << std::endl;
         return 1;
@@ -76,6 +65,17 @@ int main(int argc, char* argv[]) {
         std::cerr << "Error connecting to server" << std::endl;
         return 1;
     }
+
+    // Disable buffering for stdout and stdin
+    std::setbuf(stdout, nullptr);
+    std::setbuf(stdin, nullptr);
+    
+    // Set terminal to non-canonical mode
+    termios tty;
+    tcgetattr(STDIN_FILENO, &tty);
+    original_tty = tty;  // Save original settings
+    tty.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &tty);
 
     std::cout << "Connected to server at " << ip << ":" << port << std::endl;
     std::cout << "Type your messages (Ctrl+C to exit):" << std::endl;

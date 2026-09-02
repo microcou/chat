@@ -18,6 +18,7 @@ std::vector<ClientInfo> clients;
 std::mutex clients_mutex;
 
 void broadcast_message(const std::string& message, int sender_fd) {
+    std::cout << message << std::endl;
     std::lock_guard<std::mutex> lock(clients_mutex);
     for (const auto& client : clients) {
         if (client.fd != sender_fd) {
