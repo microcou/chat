@@ -13,7 +13,6 @@ Development is assisted by AI : Github Copilot, ChatGPT
 - Check if using boost asio for networking leads to more portable code in regards to Linux/Windows
 - Use ncurses or another terminal management library, portable if possible, to replace the messy code.
 - Study the IRC protocol
-- Setup github actions to build the binaries and store in a release
 
 ## Linux
 
