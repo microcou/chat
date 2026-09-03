@@ -1,6 +1,8 @@
-server
-client
-client_basic
+server_linux
+client_linux
+client_linux_basic
+client_windows
+client_windows_basic
 hello_curses
 ncurses-6.6/
 *.obj

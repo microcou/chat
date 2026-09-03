@@ -1,16 +1,18 @@
 CXX = g++
 CXXFLAGS = -std=c++20 -Wall -Wextra -pthread
-TARGETS = server client client_basic
+# Additional compiler flags for static linking of the standard C++ library and GCC runtime, costs about 1.2 MB per binary.
+CXXFLAGS += -static-libstdc++ -static-libgcc
+TARGETS = server_linux client_linux client_linux_basic
 
 all: $(TARGETS)
 
-server: src/server.cpp
+server_linux: src/server_linux.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-client: src/client.cpp
+client_linux: src/client_linux.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-client_basic: src/client_basic.cpp
+client_linux_basic: src/client_linux_basic.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 clean:
