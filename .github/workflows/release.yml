@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,7 +24,11 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: linux-binaries
-          path: build/*
+          path: |
+            build/server_linux
+            build/client_linux
+            build/client_linux_basic
+          if-no-files-found: error
 
   build-windows:
     name: Build Windows binaries
@@ -45,11 +50,15 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: windows-binaries
-          path: build/*
+          path: |
+            build/client_windows_basic.exe
+            build/client_windows.exe
+          if-no-files-found: error
 
   release:
     name: Create GitHub release
     needs: [build-linux, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - name: Download Linux binaries
