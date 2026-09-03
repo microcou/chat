@@ -1,17 +1,19 @@
-# Chatcpp
+# Chat
 
-Logiciel client/serveur de chat.
-- server : le serveur
-- client_basic : le client le plus simple
-- client : un client plus complexe : conserve le message en cours de frappe lors de la réception d'un message.
+Client/server instant messaging software. Contains :
+- server
+- client_basic
+- client
 - client_basic_windows
-- client_windows : TODO
+- client_windows
+
+Development is assisted by AI : Github Copilot, ChatGPT
 
 ## TODO
 
-- Etudier si l'utilisation de boost asio permet du code plus portable Linux/Windows
-- Utiliser ncurses
-- Etudier le protocole IRC
+- Check if using boost asio for networking leads to more portable code in regards to Linux/Windows
+- Use ncurses or another terminal management library, portable if possible, to replace the messy code.
+- Study the IRC protocol
 
 ## Linux
 

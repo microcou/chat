@@ -1,12 +1,15 @@
 CXX = cl
 CXXFLAGS = /std:c++20 /EHsc /nologo /MT
 LIBS = ws2_32.lib
-TARGETS = client_basic_windows.exe
+TARGETS = client_basic_windows.exe client_windows.exe
 
 all: $(TARGETS)
 
 client_basic_windows.exe: src\client_basic_windows.cpp
 	$(CXX) $(CXXFLAGS) src\client_basic_windows.cpp /Fe:$@ /link $(LIBS)
+
+client_windows.exe: src\client_windows.cpp
+	$(CXX) $(CXXFLAGS) src\client_windows.cpp /Fe:$@ /link $(LIBS)
 
 clean:
 	del /q $(TARGETS) *.obj 2>nul
