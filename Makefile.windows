@@ -6,10 +6,10 @@ TARGETS = client_windows_basic.exe client_windows.exe
 all: $(TARGETS)
 
 client_windows_basic.exe: src\client_windows_basic.cpp
-	$(CXX) $(CXXFLAGS) $^ /Fe:$@ /link $(LIBS)
+	$(CXX) $(CXXFLAGS) $** /Fe:$@ /link $(LIBS)
 
 client_windows.exe: src\client_windows.cpp
-	$(CXX) $(CXXFLAGS) $^ /Fe:$@ /link $(LIBS)
+	$(CXX) $(CXXFLAGS) $** /Fe:$@ /link $(LIBS)
 
 clean:
 	del /q $(TARGETS) *.obj 2>nul

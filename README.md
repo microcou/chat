@@ -1,10 +1,10 @@
 # Chat
 
 Client/server instant messaging software. Contains :
-- server_linux
-- client_linux
-- client_windows
-It also contains basic version that are barely functional but as simple as possible.
+- A server (linux only), start command : `server_linux 12345`
+- A client for Linux and a client for Windows, start command : `client_linux 192.168.56.102 12345`
+
+It also contains basic versions of the clients that are barely functional but as simple as possible.
 
 Development is assisted by AI : Github Copilot, ChatGPT
 
